@@ -23,6 +23,8 @@ model Category {
   taxType         String?
   subcategories   Subcategory[]
   items           Item[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 model Subcategory {
@@ -35,6 +37,8 @@ model Subcategory {
   categoryId      Int
   category        Category      @relation(fields: [categoryId], references: [id])
   items           Item[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
 
 model Item {
@@ -51,4 +55,6 @@ model Item {
   subcategory     Subcategory?  @relation(fields: [subcategoryId], references: [id])
   categoryId      Int
   category        Category      @relation(fields: [categoryId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 }
