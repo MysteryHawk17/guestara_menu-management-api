@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as itemService from "../services/itemService";
 import { IItemCreate } from "../interfaces/Item";
+import { deleteCache } from "../middleware/cacheMiddleware";
 
 /**
  * @route POST /item
@@ -14,6 +15,12 @@ export const createItem = async (req: Request, res: Response) => {
   try {
     const itemData: IItemCreate = req.body;
     const item = await itemService.createItem(itemData);
+
+    await deleteCache("items");
+    await deleteCache(`item_category_${item.categoryId}`);
+    await deleteCache(`item_subcategory_${item.subcategoryId}`)
+    await deleteCache(`item_search_${item.name}`);
+
     res.status(201).json(item);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -110,6 +117,14 @@ export const editItem = async (req: Request, res: Response) => {
     const { id } = req.params;
     const itemData: Partial<IItemCreate> = req.body;
     const updatedItem = await itemService.editItem(parseInt(id), itemData);
+
+    await deleteCache("items");
+    await deleteCache(`item_category_${updatedItem.categoryId}`);
+    await deleteCache(`item_subcategory_${updatedItem.subcategoryId}`)
+    await deleteCache(`item_search_${updatedItem.name}`);
+    await deleteCache(`item_id_${id}`);
+    await deleteCache(`item_name_${updatedItem.name}`);
+    
     res.status(200).json(updatedItem);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -126,7 +141,6 @@ export const editItem = async (req: Request, res: Response) => {
 export const searchItemsByName = async (req: Request, res: Response) => {
   try {
     const { name } = req.query;
-    console.log(req.query);
     const items = await itemService.searchItemsByName(name as string);
     res.status(200).json(items);
   } catch (error: any) {

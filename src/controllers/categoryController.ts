@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import * as categoryService from "../services/categoryService";
 import { ICategoryCreate } from "../interfaces/Category";
-
+import {
+  deleteCache,
+} from "../middleware/cacheMiddleware";
 
 /**
  * @route POST /category
@@ -15,6 +17,9 @@ export const createCategory = async (req: Request, res: Response) => {
   try {
     const categoryData: ICategoryCreate = req.body;
     const category = await categoryService.createCategory(categoryData);
+    // Invalidate cache
+    await deleteCache("categories");
+
     res.status(201).json(category);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -46,17 +51,17 @@ export const getAllCategories = async (req: Request, res: Response) => {
  */
 
 export const getCategoryById = async (req: Request, res: Response) => {
-  try {
-    const category = await categoryService.getCategoryById(
-      Number(req.params.id)
-    );
-    if (!category) {
-      return res.status(404).json({ message: "Category not found" });
+    try {
+      const category = await categoryService.getCategoryById(
+        Number(req.params.id)
+      );
+      if (!category) {
+        return res.status(404).json({ message: "Category not found" });
+      }
+      res.status(200).json(category);
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
     }
-    res.status(200).json(category);
-  } catch (error: any) {
-    res.status(500).json({ error: error.message });
-  }
 };
 
 /**
@@ -71,14 +76,18 @@ export const getCategoryById = async (req: Request, res: Response) => {
 export const updateCategory = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
-    const updateCategoryData:Partial<ICategoryCreate> = req.body;
+    const updateCategoryData: Partial<ICategoryCreate> = req.body;
     const category = await categoryService.updateCategory(
       parseInt(id),
-      updateCategoryData      
+      updateCategoryData
     );
+
+    // Invalidate cache
+    await deleteCache("categories");
+    await deleteCache(`category:${id}`);
+
     res.status(200).json(category);
-  } catch (error :any) {
+  } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
-

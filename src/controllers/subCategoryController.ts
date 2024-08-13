@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import * as subcategoryService from "../services/subCategoryService";
 import { ISubcategoryCreate } from "../interfaces/SubCategory";
+import { deleteCache } from "../middleware/cacheMiddleware";
 
 /**
  * @route POST /subcategory
@@ -13,15 +14,14 @@ import { ISubcategoryCreate } from "../interfaces/SubCategory";
 export const createSubcategory = async (req: Request, res: Response) => {
   try {
     const subcategoryData: ISubcategoryCreate = req.body;
-    const subcategory = await subcategoryService.createSubcategory(
-      subcategoryData
-    );
+    const subcategory =
+      await subcategoryService.createSubcategory(subcategoryData);
+    await deleteCache("subcategories");
     res.status(201).json(subcategory);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 /**
  * @route GET /subcategory
@@ -74,9 +74,8 @@ export const getSubcategoryByIdOrName = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const idOrName = isNaN(Number(id)) ? id : parseInt(id);
-    const subcategory = await subcategoryService.getSubcategoryByIdOrName(
-      idOrName
-    );
+    const subcategory =
+      await subcategoryService.getSubcategoryByIdOrName(idOrName);
     res.status(200).json(subcategory);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -100,6 +99,12 @@ export const editSubcategory = async (req: Request, res: Response) => {
       parseInt(id),
       subcategoryData
     );
+
+    // Invalidate cache
+    await deleteCache("subcategories");
+    await deleteCache(`subcategory_id_${updatedSubcategory.id}`);
+    await deleteCache(`subcategory_name_${updatedSubcategory.name}`);
+
     res.status(200).json(updatedSubcategory);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
