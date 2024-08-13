@@ -15,11 +15,7 @@ export const getAllSubcategories = async () => {
   if (cachedData) {
     return cachedData;
   }
-  const subcategories = await prisma.subcategory.findMany({
-    include: {
-      items: true,
-    },
-  });
+  const subcategories = await prisma.subcategory.findMany({});
   await setCache(cacheKey, subcategories);
 
   return subcategories;
@@ -34,10 +30,6 @@ export const getSubcategoriesByCategoryId = async (categoryId: number) => {
   }
   const items = await prisma.subcategory.findMany({
     where: { categoryId },
-
-    include: {
-      items: true,
-    },
   });
 
   await setCache(cacheKey, items);
@@ -62,9 +54,6 @@ export const getSubcategoryByIdOrName = async (idOrName: number | string) => {
         { id: typeof idOrName === "number" ? idOrName : undefined },
         { name: typeof idOrName === "string" ? idOrName : undefined },
       ],
-    },
-    include: {
-      items: true,
     },
   });
 

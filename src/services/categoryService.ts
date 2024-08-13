@@ -8,16 +8,11 @@ export const createCategory = async (data: ICategoryCreate) => {
 
 export const getAllCategories = async () => {
   const cacheKey = "categories";
-  const cachedData =  await getCache(cacheKey);
+  const cachedData = await getCache(cacheKey);
   if (cachedData) {
     return cachedData;
   }
-  const categories = await prisma.category.findMany({
-    include: {
-      subcategories: true,
-      items: true,
-    },
-  });
+  const categories = await prisma.category.findMany();
 
   await setCache(cacheKey, categories);
   return categories;
@@ -32,14 +27,10 @@ export const getCategoryById = async (id: number) => {
   }
   const category = await prisma.category.findUnique({
     where: { id },
-    include: {
-      subcategories: true,
-      items: true,
-    },
   });
 
   if (category) {
-    await setCache(cacheKey,category);
+    await setCache(cacheKey, category);
   }
 
   return category;
