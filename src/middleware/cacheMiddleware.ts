@@ -17,7 +17,7 @@ const getCache = async (key: string) => {
 };
 
 // Function to set cache
-const setCache = async (key: string, data: any) => {
+const setCache = async (key: string, data: object) => {
   try {
     await client.setEx(key, CACHE_EXPIRY, JSON.stringify(data));
   } catch (err) {

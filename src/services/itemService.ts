@@ -75,6 +75,10 @@ export const getItemByIdOrName = async (idOrName: number | string) => {
     },
   });
 
+  if (!item) {
+    return null;
+  }
+  
   await setCache(cacheKey, item);
 
   return item;
